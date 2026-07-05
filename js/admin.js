@@ -8,7 +8,8 @@ import {
   getGeneration,
   generateId,
   validateData,
-  formatDateShort
+  formatDateShort,
+  isPhotoUrlSafe
 } from './data.js';
 import { isLoggedIn, login, logout } from './auth.js';
 
@@ -217,41 +218,78 @@ function renderNode(container, node, depth) {
   li.className = 'admin-tree-node';
   li.dataset.name = node.name;
 
-  const photo = node.photo || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0ebe4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='16'%3E${node.name.charAt(0)}%3C/text%3E%3C/svg%3E`;
   const life = [formatDateShort(node.birth) || '?', formatDateShort(node.death) || '今'].join(' - ');
   const generation = depth + 1;
 
   const row = document.createElement('div');
   row.className = 'admin-tree-row';
   row.style.setProperty('--depth', depth);
-  row.innerHTML = `
-    <img class="admin-tree-photo" src="${photo}" alt="${node.name}" />
-    <div class="admin-tree-info">
-      <span class="admin-tree-name">${node.name}</span>
-      <span class="admin-tree-generation">第${generation}世</span>
-      <span class="admin-tree-life">${life}</span>
-    </div>
-    <div class="admin-tree-actions">
-      <button type="button" class="btn-action btn-edit" data-action="edit" title="编辑">编辑</button>
-      <button type="button" class="btn-action btn-add-child" data-action="add-child" title="添加子女">添加子女</button>
-      <button type="button" class="btn-action btn-delete" data-action="delete" title="删除">删除</button>
-    </div>
-  `;
 
-  row.querySelector('[data-action="edit"]').addEventListener('click', (e) => {
+  const imgEl = document.createElement('img');
+  imgEl.className = 'admin-tree-photo';
+  imgEl.alt = node.name;
+  imgEl.src = isPhotoUrlSafe(node.photo)
+    ? node.photo
+    : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' fill='%23f0ebe4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='16'%3E${encodeURIComponent(node.name.charAt(0))}%3C/text%3E%3C/svg%3E`;
+  row.appendChild(imgEl);
+
+  const infoDiv = document.createElement('div');
+  infoDiv.className = 'admin-tree-info';
+
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'admin-tree-name';
+  nameSpan.textContent = node.name;
+  infoDiv.appendChild(nameSpan);
+
+  const genSpan = document.createElement('span');
+  genSpan.className = 'admin-tree-generation';
+  genSpan.textContent = `第${generation}世`;
+  infoDiv.appendChild(genSpan);
+
+  const lifeSpan = document.createElement('span');
+  lifeSpan.className = 'admin-tree-life';
+  lifeSpan.textContent = life;
+  infoDiv.appendChild(lifeSpan);
+
+  row.appendChild(infoDiv);
+
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'admin-tree-actions';
+
+  const editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'btn-action btn-edit';
+  editBtn.title = '编辑';
+  editBtn.textContent = '编辑';
+  editBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     openMemberModal(node.id);
   });
+  actionsDiv.appendChild(editBtn);
 
-  row.querySelector('[data-action="add-child"]').addEventListener('click', (e) => {
+  const addChildBtn = document.createElement('button');
+  addChildBtn.type = 'button';
+  addChildBtn.className = 'btn-action btn-add-child';
+  addChildBtn.title = '添加子女';
+  addChildBtn.textContent = '添加子女';
+  addChildBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     openMemberModal('', node.id);
   });
+  actionsDiv.appendChild(addChildBtn);
 
-  row.querySelector('[data-action="delete"]').addEventListener('click', (e) => {
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'btn-action btn-delete';
+  deleteBtn.title = '删除';
+  deleteBtn.textContent = '删除';
+  deleteBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     deleteMember(node.id);
   });
+  actionsDiv.appendChild(deleteBtn);
+
+  row.appendChild(actionsDiv);
 
   li.appendChild(row);
 

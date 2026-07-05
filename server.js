@@ -28,7 +28,7 @@ function getDefaultData() {
     people: [
       {
         id: 'p1',
-        name: '张德祖',
+        name: '王德祖',
         gender: 'male',
         birth: '1900-01-15',
         death: '1985-06-20',
@@ -40,7 +40,7 @@ function getDefaultData() {
       },
       {
         id: 'p2',
-        name: '张文昌',
+        name: '王文昌',
         gender: 'male',
         birth: '1923-08-12',
         death: '2001-11-05',
@@ -52,7 +52,7 @@ function getDefaultData() {
       },
       {
         id: 'p3',
-        name: '张武盛',
+        name: '王武盛',
         gender: 'male',
         birth: '1926-04-30',
         death: '1998-09-18',
@@ -64,7 +64,7 @@ function getDefaultData() {
       },
       {
         id: 'p4',
-        name: '张秀兰',
+        name: '王秀兰',
         gender: 'female',
         birth: '1931-12-03',
         death: '2010-07-22',
@@ -76,7 +76,7 @@ function getDefaultData() {
       },
       {
         id: 'p5',
-        name: '张明远',
+        name: '王明远',
         gender: 'male',
         birth: '1952-06-18',
         death: '',
@@ -88,7 +88,7 @@ function getDefaultData() {
       },
       {
         id: 'p6',
-        name: '张明珠',
+        name: '王明珠',
         gender: 'female',
         birth: '1955-03-09',
         death: '',
@@ -100,7 +100,7 @@ function getDefaultData() {
       },
       {
         id: 'p7',
-        name: '张志强',
+        name: '王志强',
         gender: 'male',
         birth: '1958-11-26',
         death: '',
@@ -124,7 +124,7 @@ function getDefaultData() {
       },
       {
         id: 'p9',
-        name: '张浩宇',
+        name: '王浩宇',
         gender: 'male',
         birth: '1980-04-02',
         death: '',
@@ -136,7 +136,7 @@ function getDefaultData() {
       },
       {
         id: 'p10',
-        name: '张思琪',
+        name: '王思琪',
         gender: 'female',
         birth: '1985-09-21',
         death: '',
@@ -148,7 +148,7 @@ function getDefaultData() {
       },
       {
         id: 'p11',
-        name: '张俊豪',
+        name: '王俊豪',
         gender: 'male',
         birth: '1988-07-07',
         death: '',
@@ -223,8 +223,8 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-    const generation = req.body.generation || '0';
-    const safeName = `G${generation}-${formatTimestamp()}${ext}`;
+    const generation = String(req.body.generation || '0').replace(/[^0-9]/g, '');
+    const safeName = `G${generation || '0'}-${formatTimestamp()}${ext}`;
     cb(null, safeName);
   }
 });

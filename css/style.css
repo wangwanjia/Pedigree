@@ -317,6 +317,17 @@ button {
   color: var(--text-muted);
 }
 
+.node-relation {
+  margin: 4px 0 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--node-border);
+  background: rgba(139, 94, 60, 0.08);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -699,7 +710,6 @@ button {
   align-items: center;
   gap: 12px;
   padding: 10px 20px;
-  padding-left: calc(var(--tree-indent) * var(--depth, 0) + 20px);
   margin: 2px 0;
   border-radius: var(--radius-sm);
   transition: background 0.15s ease;
@@ -917,6 +927,71 @@ button {
 
 .combobox-list li.empty:hover {
   background: transparent;
+}
+
+/* Login overlay */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg-color);
+}
+
+.login-overlay.hidden {
+  display: none;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 36px 28px;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.login-card h2 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  color: var(--node-border);
+}
+
+.login-hint {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(139, 94, 60, 0.25);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 15px;
+  outline: none;
+}
+
+.login-form input:focus {
+  border-color: var(--node-border);
+}
+
+.login-error {
+  margin: 0;
+  font-size: 13px;
+  color: #d84a4a;
+  text-align: left;
 }
 
 /* Responsive */

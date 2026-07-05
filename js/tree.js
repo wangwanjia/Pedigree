@@ -1,7 +1,7 @@
-import { extractYear } from './data.js';
+import { extractYear, isPhotoUrlSafe, getKinshipTerm } from './data.js';
 
 const NODE_WIDTH = 120;
-const NODE_HEIGHT = 130;
+const NODE_HEIGHT = 150;
 const LEVEL_GAP = 160;
 const SIBLING_GAP = 40;
 
@@ -77,7 +77,7 @@ function calculateLayout(root) {
   return { nodes, links, width, height, minX };
 }
 
-function renderTree(container, linksSvg, data, onNodeClick) {
+function renderTree(container, linksSvg, data, onNodeClick, viewerId) {
   const root = buildTree(data);
   const layout = calculateLayout(root);
 
@@ -104,19 +104,43 @@ function renderTree(container, linksSvg, data, onNodeClick) {
     node.setAttribute('aria-label', `${n.data.name}，点击查看详情`);
 
     const photo = n.data.photo || '';
-    const img = photo
-      ? `<img class="node-photo" src="${photo}" alt="${n.data.name}" loading="lazy" />`
-      : `<img class="node-photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f0ebe4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='20'%3E${n.data.name.charAt(0)}%3C/text%3E%3C/svg%3E" alt="${n.data.name}" />`;
-
     const life = [extractYear(n.data.birth), extractYear(n.data.death) || '今'].filter(Boolean).join(' - ');
     const generation = n.depth + 1;
 
-    node.innerHTML = `
-      <span class="node-generation">第${generation}世</span>
-      ${img}
-      <p class="node-name">${n.data.name}</p>
-      ${life ? `<p class="node-life">${life}</p>` : ''}
-    `;
+    const generationSpan = document.createElement('span');
+    generationSpan.className = 'node-generation';
+    generationSpan.textContent = `第${generation}世`;
+    node.appendChild(generationSpan);
+
+    const imgEl = document.createElement('img');
+    imgEl.className = 'node-photo';
+    imgEl.alt = n.data.name;
+    if (isPhotoUrlSafe(photo)) {
+      imgEl.src = photo;
+      imgEl.loading = 'lazy';
+    } else {
+      imgEl.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23f0ebe4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='20'%3E${encodeURIComponent(n.data.name.charAt(0))}%3C/text%3E%3C/svg%3E`;
+    }
+    node.appendChild(imgEl);
+
+    const nameP = document.createElement('p');
+    nameP.className = 'node-name';
+    nameP.textContent = n.data.name;
+    node.appendChild(nameP);
+
+    if (viewerId) {
+      const relationP = document.createElement('p');
+      relationP.className = 'node-relation';
+      relationP.textContent = getKinshipTerm(data, viewerId, n.data.id) || '';
+      node.appendChild(relationP);
+    }
+
+    if (life) {
+      const lifeP = document.createElement('p');
+      lifeP.className = 'node-life';
+      lifeP.textContent = life;
+      node.appendChild(lifeP);
+    }
 
     node.addEventListener('click', () => onNodeClick(n.data));
     node.addEventListener('keydown', (e) => {

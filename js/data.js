@@ -7,7 +7,7 @@ const defaultData = {
   people: [
     {
       id: 'p1',
-      name: '张德祖',
+      name: '王德祖',
       gender: 'male',
       birth: '1900-01-15',
       death: '1985-06-20',
@@ -19,7 +19,7 @@ const defaultData = {
     },
     {
       id: 'p2',
-      name: '张文昌',
+      name: '王文昌',
       gender: 'male',
       birth: '1923-08-12',
       death: '2001-11-05',
@@ -31,7 +31,7 @@ const defaultData = {
     },
     {
       id: 'p3',
-      name: '张武盛',
+      name: '王武盛',
       gender: 'male',
       birth: '1926-04-30',
       death: '1998-09-18',
@@ -43,7 +43,7 @@ const defaultData = {
     },
     {
       id: 'p4',
-      name: '张秀兰',
+      name: '王秀兰',
       gender: 'female',
       birth: '1931-12-03',
       death: '2010-07-22',
@@ -55,7 +55,7 @@ const defaultData = {
     },
     {
       id: 'p5',
-      name: '张明远',
+      name: '王明远',
       gender: 'male',
       birth: '1952-06-18',
       death: '',
@@ -67,7 +67,7 @@ const defaultData = {
     },
     {
       id: 'p6',
-      name: '张明珠',
+      name: '王明珠',
       gender: 'female',
       birth: '1955-03-09',
       death: '',
@@ -79,7 +79,7 @@ const defaultData = {
     },
     {
       id: 'p7',
-      name: '张志强',
+      name: '王志强',
       gender: 'male',
       birth: '1958-11-26',
       death: '',
@@ -103,7 +103,7 @@ const defaultData = {
     },
     {
       id: 'p9',
-      name: '张浩宇',
+      name: '王浩宇',
       gender: 'male',
       birth: '1980-04-02',
       death: '',
@@ -115,7 +115,7 @@ const defaultData = {
     },
     {
       id: 'p10',
-      name: '张思琪',
+      name: '王思琪',
       gender: 'female',
       birth: '1985-09-21',
       death: '',
@@ -127,7 +127,7 @@ const defaultData = {
     },
     {
       id: 'p11',
-      name: '张俊豪',
+      name: '王俊豪',
       gender: 'male',
       birth: '1988-07-07',
       death: '',
@@ -242,6 +242,172 @@ function getGeneration(data, id) {
   return generation;
 }
 
+function getPathToAncestor(data, fromId, ancestorId) {
+  const path = [];
+  let current = getPerson(data, fromId);
+  while (current) {
+    path.push(current);
+    if (current.id === ancestorId) return path;
+    const parent = getParent(data, current.id);
+    if (!parent) return null;
+    current = parent;
+  }
+  return null;
+}
+
+function findLCA(data, id1, id2) {
+  const ancestors = new Set();
+  let current = getPerson(data, id1);
+  while (current) {
+    ancestors.add(current.id);
+    const parent = getParent(data, current.id);
+    if (!parent) break;
+    current = parent;
+  }
+  current = getPerson(data, id2);
+  while (current) {
+    if (ancestors.has(current.id)) return current;
+    const parent = getParent(data, current.id);
+    if (!parent) break;
+    current = parent;
+  }
+  return null;
+}
+
+function compareAge(data, id1, id2) {
+  const p1 = getPerson(data, id1);
+  const p2 = getPerson(data, id2);
+  if (!p1 || !p2 || !p1.birth || !p2.birth) return 0;
+  const y1 = parseInt(extractYear(p1.birth), 10);
+  const y2 = parseInt(extractYear(p2.birth), 10);
+  if (isNaN(y1) || isNaN(y2)) return 0;
+  return y1 - y2;
+}
+
+function getAncestorTerm(path) {
+  const depth = path.length - 1;
+  const target = path[path.length - 1];
+  const isFemale = target.gender === 'female';
+
+  if (depth === 1) return isFemale ? '母亲' : '父亲';
+
+  if (depth === 2) {
+    const parent = path[1];
+    if (parent.gender === 'male') {
+      return isFemale ? '奶奶' : '爷爷';
+    }
+    return isFemale ? '外婆' : '外公';
+  }
+
+  if (depth === 3) {
+    const parent = path[1];
+    const prefix = parent.gender === 'female' ? '外' : '';
+    return prefix + (isFemale ? '曾祖母' : '曾祖父');
+  }
+
+  if (depth === 4) {
+    const parent = path[1];
+    const prefix = parent.gender === 'female' ? '外' : '';
+    return prefix + (isFemale ? '高祖母' : '高祖父');
+  }
+
+  if (depth === 5) {
+    const parent = path[1];
+    const prefix = parent.gender === 'female' ? '外' : '';
+    return prefix + (isFemale ? '天祖母' : '天祖父');
+  }
+
+  const parent = path[1];
+  const prefix = parent.gender === 'female' ? '外' : '';
+  return prefix + (isFemale ? '远祖奶奶' : '远祖爷爷');
+}
+
+function getDescendantTerm(path) {
+  const depth = path.length - 1;
+  const target = path[0];
+  const isFemale = target.gender === 'female';
+
+  if (depth === 1) return isFemale ? '女儿' : '儿子';
+  if (depth === 2) return isFemale ? '孙女' : '孙子';
+  if (depth === 3) return isFemale ? '曾孙女' : '曾孙';
+  if (depth === 4) return isFemale ? '玄孙女' : '玄孙';
+  return isFemale ? `第${depth}世孙女` : `第${depth}世孙`;
+}
+
+function getCollateralTerm(data, viewerPath, targetPath) {
+  const vDepth = viewerPath.length - 1;
+  const tDepth = targetPath.length - 1;
+  const viewer = viewerPath[0];
+  const target = targetPath[0];
+  const viewerParent = viewerPath[1];
+  const targetParent = targetPath[1];
+
+  if (vDepth === 1 && tDepth === 1) {
+    const ageDiff = compareAge(data, viewer.id, target.id);
+    if (target.gender === 'male') {
+      return ageDiff > 0 ? '哥哥' : '弟弟';
+    }
+    return ageDiff > 0 ? '姐姐' : '妹妹';
+  }
+
+  if (vDepth === 1 && tDepth === 2) {
+    if (targetParent.gender === 'male') {
+      return target.gender === 'male' ? '侄子' : '侄女';
+    }
+    return target.gender === 'male' ? '外甥' : '外甥女';
+  }
+
+  if (vDepth === 2 && tDepth === 1) {
+    if (viewerParent.gender === 'male') {
+      if (target.gender === 'male') {
+        const ageDiff = compareAge(data, viewerParent.id, target.id);
+        return ageDiff > 0 ? '伯父' : '叔叔';
+      }
+      return '姑姑';
+    }
+    if (target.gender === 'male') return '舅舅';
+    return '姨妈';
+  }
+
+  if (vDepth === 2 && tDepth === 2) {
+    const ageDiff = compareAge(data, viewer.id, target.id);
+    const paternal = viewerParent.gender === 'male' && targetParent.gender === 'male';
+    if (paternal) {
+      if (target.gender === 'male') {
+        return ageDiff > 0 ? '堂哥' : '堂弟';
+      }
+      return ageDiff > 0 ? '堂姐' : '堂妹';
+    }
+    if (target.gender === 'male') {
+      return ageDiff > 0 ? '表哥' : '表弟';
+    }
+    return ageDiff > 0 ? '表姐' : '表妹';
+  }
+
+  return '远房亲戚';
+}
+
+function getKinshipTerm(data, viewerId, targetId) {
+  if (viewerId === targetId) return '自己';
+
+  const viewer = getPerson(data, viewerId);
+  const target = getPerson(data, targetId);
+  if (!viewer || !target) return null;
+
+  const ancestorPath = getPathToAncestor(data, viewerId, targetId);
+  if (ancestorPath) return getAncestorTerm(ancestorPath);
+
+  const descendantPath = getPathToAncestor(data, targetId, viewerId);
+  if (descendantPath) return getDescendantTerm(descendantPath);
+
+  const lca = findLCA(data, viewerId, targetId);
+  if (!lca) return null;
+
+  const viewerPath = getPathToAncestor(data, viewerId, lca.id);
+  const targetPath = getPathToAncestor(data, targetId, lca.id);
+  return getCollateralTerm(data, viewerPath, targetPath);
+}
+
 function generateId(data) {
   const ids = data.people.map(p => parseInt(p.id.replace('p', ''), 10) || 0);
   const max = ids.length ? Math.max(...ids) : 0;
@@ -291,6 +457,13 @@ function formatDateShort(dateStr) {
   return parts.slice(0, 3).join('.');
 }
 
+function isPhotoUrlSafe(url) {
+  if (!url) return false;
+  if (url.startsWith('/images/')) return true;
+  if (url.startsWith('data:image/')) return true;
+  return false;
+}
+
 export {
   loadData,
   saveData,
@@ -300,9 +473,11 @@ export {
   getChildren,
   getParent,
   getGeneration,
+  getKinshipTerm,
   generateId,
   validateData,
   extractYear,
   formatDate,
-  formatDateShort
+  formatDateShort,
+  isPhotoUrlSafe
 };

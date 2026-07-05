@@ -1,5 +1,5 @@
 const AUTH_KEY = 'family_tree_auth';
-const DEFAULT_PASSWORD = 'admin123';
+const DEFAULT_PASSWORD = 'wwwang';
 
 function isLoggedIn() {
   return localStorage.getItem(AUTH_KEY) === 'true';

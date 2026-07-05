@@ -26,6 +26,18 @@
     </div>
   </main>
 
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <h2 id="loginFamilyName">族谱</h2>
+      <p class="login-hint">请输入您在族谱中的姓名以查看族谱</p>
+      <form id="loginForm" class="login-form">
+        <input type="text" id="loginName" placeholder="请输入密码" autocomplete="off" required />
+        <p class="login-error" id="loginError" hidden></p>
+        <button type="submit" class="btn-primary">进入族谱</button>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
       <button class="modal-close" id="modalClose" aria-label="关闭">×</button>

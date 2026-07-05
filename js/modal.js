@@ -1,4 +1,4 @@
-import { formatDate, getGeneration } from './data.js';
+import { formatDate, getGeneration, isPhotoUrlSafe } from './data.js';
 
 function openModal(person, data) {
   const overlay = document.getElementById('modalOverlay');
@@ -11,7 +11,9 @@ function openModal(person, data) {
   const bio = document.getElementById('modalBio');
   const notes = document.getElementById('modalNotes');
 
-  photo.src = person.photo || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='250'%3E%3Crect width='400' height='250' fill='%23f0ebe4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='48'%3E${person.name.charAt(0)}%3C/text%3E%3C/svg%3E`;
+  photo.src = isPhotoUrlSafe(person.photo)
+    ? person.photo
+    : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='250'%3E%3Crect width='400' height='250' fill='%23f0ebe4'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='48'%3E${encodeURIComponent(person.name.charAt(0))}%3C/text%3E%3C/svg%3E`;
   photo.alt = person.name;
   name.textContent = person.name;
 

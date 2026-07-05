@@ -10,8 +10,14 @@ const familyNameEl = document.getElementById('familyName');
 const resetBtn = document.getElementById('resetView');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
+const loginOverlay = document.getElementById('loginOverlay');
+const loginForm = document.getElementById('loginForm');
+const loginName = document.getElementById('loginName');
+const loginError = document.getElementById('loginError');
+const loginFamilyName = document.getElementById('loginFamilyName');
 
 let data = null;
+let viewerId = null;
 let scale = 1;
 let translateX = 0;
 let translateY = 0;
@@ -49,7 +55,7 @@ function render() {
     const active = document.querySelector(`.tree-node[data-id="${person.id}"]`);
     if (active) active.classList.add('active');
     openModal(person, data);
-  });
+  }, viewerId);
 
   nodePositions = treeInfo.positions || new Map();
   fitToScreen(treeInfo);
@@ -199,11 +205,80 @@ window.addEventListener('resize', () => {
   fitToScreen(treeSize);
 });
 
-async function init() {
-  data = await loadData();
+function showLoginError(message) {
+  loginError.textContent = message;
+  loginError.hidden = false;
+}
+
+function clearLoginError() {
+  loginError.textContent = '';
+  loginError.hidden = true;
+}
+
+function enterSite(personId) {
+  viewerId = personId;
+  sessionStorage.setItem('family_tree_viewer', 'true');
+  sessionStorage.setItem('family_tree_viewer_id', personId);
+  loginOverlay.classList.add('hidden');
   familyNameEl.textContent = data.familyName || '族谱';
   initModal();
   render();
+}
+
+async function tryAutoLogin() {
+  if (sessionStorage.getItem('family_tree_viewer') !== 'true') return false;
+  const savedId = sessionStorage.getItem('family_tree_viewer_id');
+  if (!savedId) return false;
+
+  try {
+    data = await loadData();
+    const person = data.people.find(p => p.id === savedId);
+    if (!person) {
+      sessionStorage.removeItem('family_tree_viewer');
+      sessionStorage.removeItem('family_tree_viewer_id');
+      return false;
+    }
+    enterSite(savedId);
+    return true;
+  } catch (e) {
+    console.error('自动登录失败', e);
+    return false;
+  }
+}
+
+async function handleLoginSubmit(e) {
+  e.preventDefault();
+  clearLoginError();
+
+  const name = loginName.value.trim();
+  if (!name) {
+    showLoginError('请输入姓名');
+    return;
+  }
+
+  try {
+    data = await loadData();
+  } catch (e) {
+    showLoginError('加载数据失败，请稍后重试');
+    return;
+  }
+
+  const person = data.people.find(p => p.name === name);
+  if (!person) {
+    showLoginError('未找到该姓名，请输入族谱中存在的姓名');
+    return;
+  }
+
+  enterSite(person.id);
+}
+
+async function init() {
+  loginFamilyName.textContent = '族谱';
+  const autoLoggedIn = await tryAutoLogin();
+  if (!autoLoggedIn) {
+    loginOverlay.classList.remove('hidden');
+  }
+  loginForm.addEventListener('submit', handleLoginSubmit);
 }
 
 init();
