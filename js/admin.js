@@ -19,6 +19,7 @@ const loginPassword = document.getElementById('loginPassword');
 const logoutBtn = document.getElementById('logoutBtn');
 const memberTree = document.getElementById('memberTree');
 const statsOverview = document.getElementById('statsOverview');
+const generationFilter = document.getElementById('generationFilter');
 const treeSearch = document.getElementById('treeSearch');
 const addMemberBtn = document.getElementById('addMemberBtn');
 const exportBtn = document.getElementById('exportBtn');
@@ -54,8 +55,7 @@ function updateUI() {
     adminPanel.hidden = false;
     logoutBtn.hidden = false;
     renderStats();
-    renderStats();
-  renderMemberTree();
+    renderMemberTree();
     updateStorageStatus();
   } else {
     loginPanel.hidden = false;
@@ -122,24 +122,36 @@ function clearParentSelection() {
 function renderStats() {
   if (!statsOverview) return;
 
-  const total = data.people.length;
-  const male = data.people.filter(p => p.gender === 'male').length;
-  const female = data.people.filter(p => p.gender === 'female').length;
-  const unknown = total - male - female;
-
   let maxGeneration = 0;
   data.people.forEach(p => {
     const gen = getGeneration(data, p.id);
     if (gen > maxGeneration) maxGeneration = gen;
   });
 
+  updateGenerationFilterOptions(maxGeneration);
+
+  const selectedGen = generationFilter ? generationFilter.value : 'all';
+  const selectedGenNum = selectedGen === 'all' ? null : parseInt(selectedGen, 10);
+
+  const filtered = data.people.filter(p => {
+    if (selectedGenNum === null) return true;
+    return getGeneration(data, p.id) === selectedGenNum;
+  });
+
+  const total = filtered.length;
+  const male = filtered.filter(p => p.gender === 'male').length;
+  const female = filtered.filter(p => p.gender === 'female').length;
+  const unknown = total - male - female;
+
   const malePercent = total ? Math.round((male / total) * 100) : 0;
   const femalePercent = total ? Math.round((female / total) * 100) : 0;
+
+  const scopeLabel = selectedGenNum === null ? '全部' : `第${selectedGenNum}世`;
 
   statsOverview.innerHTML = `
     <div class="stat-card">
       <span class="stat-value">${total}</span>
-      <span class="stat-label">人员总数</span>
+      <span class="stat-label">${scopeLabel}人员</span>
     </div>
     <div class="stat-card">
       <span class="stat-value stat-male">${male}</span>
@@ -154,7 +166,7 @@ function renderStats() {
       <span class="stat-label">繁衍世代</span>
     </div>
     <div class="stat-card stat-wide">
-      <div class="gender-bar" title="男 ${male} 人 · 女 ${female} 人 · 未填写 ${unknown} 人">
+      <div class="gender-bar" title="${scopeLabel}：男 ${male} 人 · 女 ${female} 人 · 未填写 ${unknown} 人">
         <div class="gender-bar-male" style="width: ${malePercent}%"></div>
         <div class="gender-bar-female" style="width: ${femalePercent}%"></div>
       </div>
@@ -164,6 +176,19 @@ function renderStats() {
       </div>
     </div>
   `;
+}
+
+function updateGenerationFilterOptions(maxGeneration) {
+  if (!generationFilter) return;
+  const currentValue = generationFilter.value;
+  let options = '<option value="all">全部世代</option>';
+  for (let i = 1; i <= maxGeneration; i++) {
+    options += `<option value="${i}">第${i}世</option>`;
+  }
+  generationFilter.innerHTML = options;
+  if (currentValue && [...generationFilter.options].some(o => o.value === currentValue)) {
+    generationFilter.value = currentValue;
+  }
 }
 
 function renderMemberTree() {
@@ -354,6 +379,10 @@ logoutBtn.addEventListener('click', () => {
 addMemberBtn.addEventListener('click', () => openMemberModal());
 memberModalClose.addEventListener('click', closeMemberModal);
 cancelMemberBtn.addEventListener('click', closeMemberModal);
+
+generationFilter.addEventListener('change', () => {
+  renderStats();
+});
 
 treeSearch.addEventListener('input', () => {
   filterTree(treeSearch.value);
