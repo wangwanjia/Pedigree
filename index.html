@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>族谱</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title" id="familyName">族谱</h1>
+    <div class="header-search" id="headerSearch">
+      <input type="text" id="searchInput" placeholder="搜索姓名..." autocomplete="off" />
+      <ul class="search-results" id="searchResults" hidden></ul>
+    </div>
+    <nav class="site-actions">
+      <button id="resetView" class="btn-icon" title="重置视图">⌖</button>
+      <a href="admin.html" class="btn-link">后台管理</a>
+    </nav>
+  </header>
+
+  <main class="tree-stage" id="treeStage">
+    <div class="tree-canvas" id="treeCanvas">
+      <svg class="tree-links" id="treeLinks" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="tree-nodes" id="treeNodes"></div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+      <button class="modal-close" id="modalClose" aria-label="关闭">×</button>
+      <div class="modal-media">
+        <img id="modalPhoto" src="" alt="" />
+      </div>
+      <div class="modal-body">
+        <h2 id="modalName" class="modal-name"></h2>
+        <p id="modalGeneration" class="modal-generation"></p>
+        <p id="modalLife" class="modal-life"></p>
+        <p id="modalSpouse" class="modal-spouse"></p>
+        <p id="modalAddress" class="modal-address"></p>
+        <div id="modalBio" class="modal-bio"></div>
+        <p id="modalNotes" class="modal-notes"></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

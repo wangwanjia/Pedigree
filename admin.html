@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>族谱后台管理</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="admin-body">
+  <header class="site-header">
+    <h1 class="site-title">族谱后台管理</h1>
+    <nav class="site-actions">
+      <a href="index.html" class="btn-link">返回族谱</a>
+      <button id="logoutBtn" class="btn-link">退出登录</button>
+    </nav>
+  </header>
+
+  <main class="admin-main" id="adminMain">
+    <section class="login-panel" id="loginPanel">
+      <h2>管理员登录</h2>
+      <form id="loginForm" class="login-form">
+        <label>
+          <span>密码</span>
+          <input type="password" id="loginPassword" placeholder="请输入管理密码" required />
+        </label>
+        <p class="form-hint">默认密码：admin123</p>
+        <button type="submit" class="btn-primary">登录</button>
+      </form>
+    </section>
+
+    <section class="admin-panel" id="adminPanel" hidden>
+      <div class="stats-overview" id="statsOverview"></div>
+
+      <div class="admin-toolbar">
+        <button id="addMemberBtn" class="btn-primary">+ 添加成员</button>
+        <div class="toolbar-search">
+          <input type="text" id="treeSearch" placeholder="搜索成员姓名..." autocomplete="off" />
+        </div>
+        <button id="exportBtn" class="btn-secondary">导出 JSON</button>
+        <label class="btn-secondary file-btn">
+          导入 JSON
+          <input type="file" id="importBtn" accept="application/json" hidden />
+        </label>
+        <button id="resetDataBtn" class="btn-danger">恢复示例数据</button>
+      </div>
+
+      <div class="storage-status" id="storageStatus">正在检查存储状态...</div>
+
+      <div class="member-tree" id="memberTree"></div>
+    </section>
+  </main>
+
+  <div class="modal-overlay" id="memberModal" aria-hidden="true">
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="memberFormTitle">
+      <button class="modal-close" id="memberModalClose" aria-label="关闭">×</button>
+      <div class="modal-body">
+        <h2 id="memberFormTitle">添加成员</h2>
+        <form id="memberForm" class="member-form">
+          <input type="hidden" id="mId" />
+          <div class="form-row">
+            <label>
+              <span>姓名 *</span>
+              <input type="text" id="mName" required />
+            </label>
+            <label>
+              <span>性别</span>
+              <select id="mGender">
+                <option value="male">男</option>
+                <option value="female">女</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>
+              <span>出生日期</span>
+              <input type="date" id="mBirth" />
+            </label>
+            <label>
+              <span>卒年日期</span>
+              <input type="date" id="mDeath" />
+            </label>
+          </div>
+          <div class="form-row">
+            <label>
+              <span>配偶</span>
+              <input type="text" id="mSpouse" placeholder="多个用逗号分隔" />
+            </label>
+            <label class="combobox-label">
+              <span>父亲/母亲</span>
+              <div class="combobox" id="mParentCombobox">
+                <input type="text" id="mParentSearch" placeholder="输入姓名搜索" autocomplete="off" />
+                <input type="hidden" id="mParent" />
+                <ul class="combobox-list" id="mParentList" hidden></ul>
+              </div>
+            </label>
+          </div>
+          <label>
+            <span>居住地址</span>
+            <input type="text" id="mAddress" placeholder="例如：广东省广州市" />
+          </label>
+          <label>
+            <span>头像</span>
+            <input type="file" id="mPhotoFile" accept="image/*" />
+            <input type="hidden" id="mPhoto" />
+            <img id="mPhotoPreview" class="photo-preview" src="" alt="头像预览" hidden />
+          </label>
+          <label>
+            <span>详细介绍</span>
+            <textarea id="mBio" rows="4"></textarea>
+          </label>
+          <label>
+            <span>备注</span>
+            <textarea id="mNotes" rows="2"></textarea>
+          </label>
+          <div class="form-actions">
+            <button type="button" id="deleteMemberBtn" class="btn-danger" hidden>删除</button>
+            <div class="form-actions-right">
+              <button type="button" id="cancelMemberBtn" class="btn-secondary">取消</button>
+              <button type="submit" class="btn-primary">保存</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
