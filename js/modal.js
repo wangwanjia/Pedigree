@@ -19,7 +19,16 @@ function openModal(person, data) {
   generationEl.textContent = generation > 0 ? `第 ${generation} 世` : '';
   generationEl.style.display = generation > 0 ? 'block' : 'none';
 
-  const lifeText = [formatDate(person.birth), formatDate(person.death) || '今'].filter(Boolean).join(' - ');
+  const birthText = formatDate(person.birth);
+  const deathText = formatDate(person.death);
+  let lifeText = '';
+  if (birthText && deathText) {
+    lifeText = `${birthText} - ${deathText}（离世）`;
+  } else if (birthText) {
+    lifeText = `${birthText}（在世）`;
+  } else if (deathText) {
+    lifeText = `${deathText}（离世）`;
+  }
   life.textContent = lifeText ? `生卒：${lifeText}` : '';
   life.style.display = lifeText ? 'block' : 'none';
 
